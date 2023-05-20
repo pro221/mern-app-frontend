@@ -1,59 +1,58 @@
-import axios from 'axios';
-import React, { useContext, useEffect, useReducer } from 'react';
-import { Card, Col, Row } from 'react-bootstrap';
-import LoadingBox from '../components/LoadingBox';
-import MessageBox from '../components/MessageBox';
-import { Store } from '../Store';
-import { getError } from '../utils';
-import Chart from 'react-google-charts'
-
-
-
-
+import axios from "axios";
+import React, { useContext, useEffect, useReducer } from "react";
+import { Card, Col, Row } from "react-bootstrap";
+import LoadingBox from "../components/LoadingBox";
+import MessageBox from "../components/MessageBox";
+import { Store } from "../Store";
+import { getError } from "../utils";
+import Chart from "react-google-charts";
 
 const reducer = (state, action) => {
-    switch (action.type) {
-      case 'FETCH_REQUEST':
-        return { ...state, loading: true };
-      case 'FETCH_SUCCESS':
-        return {
-          ...state,
-          summary: action.payload,
-          loading: false,
-        };
-      case 'FETCH_FAIL':
-        return { ...state, loading: false, error: action.payload };
-      default:
-        return state;
-    }
-  };
+  switch (action.type) {
+    case "FETCH_REQUEST":
+      return { ...state, loading: true };
+    case "FETCH_SUCCESS":
+      return {
+        ...state,
+        summary: action.payload,
+        loading: false,
+      };
+    case "FETCH_FAIL":
+      return { ...state, loading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
 
 export default function DashboardScreen() {
-    const [{ loading, summary, error }, dispatch] = useReducer(reducer, {
-        loading: true,
-        error: '',
-      });
-      const { state } = useContext(Store);
-      const { userInfo } = state;
-      useEffect(() => {
-        const fetchData = async () => {
-          try {
-            const { data } = await axios.get('/api/orders/summary', {
-              headers: { Authorization: `Bearer ${userInfo.token}` },
-            });
-            dispatch({ type: 'FETCH_SUCCESS', payload: data });
-          } catch (err) {
-            dispatch({
-              type: 'FETCH_FAIL',
-              payload: getError(err),
-            });
+  const [{ loading, summary, error }, dispatch] = useReducer(reducer, {
+    loading: true,
+    error: "",
+  });
+  const { state } = useContext(Store);
+  const { userInfo } = state;
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const { data } = await axios.get(
+          "https://amazon-backend-gkib.onrender.com/api/orders/summary",
+          {
+            headers: { Authorization: `Bearer ${userInfo.token}` },
           }
-        };
-        fetchData();
-      }, [userInfo]);
+        );
+        dispatch({ type: "FETCH_SUCCESS", payload: data });
+      } catch (err) {
+        dispatch({
+          type: "FETCH_FAIL",
+          payload: getError(err),
+        });
+      }
+    };
+    fetchData();
+  }, [userInfo]);
   return (
     <div>
-              <h1>Dashboard</h1>
+      <h1>Dashboard</h1>
       {loading ? (
         <LoadingBox />
       ) : error ? (
@@ -110,7 +109,7 @@ export default function DashboardScreen() {
                 chartType="AreaChart"
                 loader={<div>Loading Chart...</div>}
                 data={[
-                  ['Date', 'Sales'],
+                  ["Date", "Sales"],
                   ...summary.dailyOrders.map((x) => [x._id, x.sales]),
                 ]}
               ></Chart>
@@ -127,7 +126,7 @@ export default function DashboardScreen() {
                 chartType="PieChart"
                 loader={<div>Loading Chart...</div>}
                 data={[
-                  ['Category', 'Products'],
+                  ["Category", "Products"],
                   ...summary.productCategories.map((x) => [x._id, x.count]),
                 ]}
               ></Chart>
@@ -136,5 +135,5 @@ export default function DashboardScreen() {
         </>
       )}
     </div>
-  )
+  );
 }

@@ -1,59 +1,61 @@
-import axios from 'axios';
-import React, { useContext, useEffect, useReducer } from 'react'
-import { useNavigate } from 'react-router-dom';
-import { Store } from '../Store';
-import { getError } from '../utils';
-import { Helmet } from 'react-helmet-async';
-import LoadingBox from '../components/LoadingBox';
-import MessageBox from '../components/MessageBox';
-import { Button } from 'react-bootstrap';
-
+import axios from "axios";
+import React, { useContext, useEffect, useReducer } from "react";
+import { useNavigate } from "react-router-dom";
+import { Store } from "../Store";
+import { getError } from "../utils";
+import { Helmet } from "react-helmet-async";
+import LoadingBox from "../components/LoadingBox";
+import MessageBox from "../components/MessageBox";
+import { Button } from "react-bootstrap";
 
 function reducer(state, action) {
-    switch (action.type) {
-        case 'FETCH_REQUEST':
-            return { ...state, loading: true };
-        case 'FETCH_SUCCESS':
-            return {
-                ...state,
-                orders: action.payload,
-                loading: false,
-            };
-        case 'FETCH_FAIL':
-            return { ...state, loading: false, error: action.payload };
-        default:
-            return state;
-    }
+  switch (action.type) {
+    case "FETCH_REQUEST":
+      return { ...state, loading: true };
+    case "FETCH_SUCCESS":
+      return {
+        ...state,
+        orders: action.payload,
+        loading: false,
+      };
+    case "FETCH_FAIL":
+      return { ...state, loading: false, error: action.payload };
+    default:
+      return state;
+  }
 }
 
 export default function OrderListScreen() {
-    const navigate = useNavigate();
-    const { state } = useContext(Store);
-    const { userInfo } = state;
-    const [{ loading, error, orders }, dispatch] = useReducer(reducer, {
-        loading: true,
-        error: '',
-      });
-      useEffect(() => {
-        const fetchData = async () => {
-          try {
-            dispatch({ type: 'FETCH_REQUEST' });
-            const { data } = await axios.get(`/api/orders`, {
-              headers: { Authorization: `Bearer ${userInfo.token}` },
-            });
-            dispatch({ type: 'FETCH_SUCCESS', payload: data });
-          } catch (err) {
-            dispatch({
-              type: 'FETCH_FAIL',
-              payload: getError(err),
-            });
+  const navigate = useNavigate();
+  const { state } = useContext(Store);
+  const { userInfo } = state;
+  const [{ loading, error, orders }, dispatch] = useReducer(reducer, {
+    loading: true,
+    error: "",
+  });
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        dispatch({ type: "FETCH_REQUEST" });
+        const { data } = await axios.get(
+          `https://amazon-backend-gkib.onrender.com/api/orders`,
+          {
+            headers: { Authorization: `Bearer ${userInfo.token}` },
           }
-        };
-        fetchData();
-      }, [userInfo]);
+        );
+        dispatch({ type: "FETCH_SUCCESS", payload: data });
+      } catch (err) {
+        dispatch({
+          type: "FETCH_FAIL",
+          payload: getError(err),
+        });
+      }
+    };
+    fetchData();
+  }, [userInfo]);
   return (
     <div>
-        <Helmet>
+      <Helmet>
         <title>Orders</title>
       </Helmet>
       <h1>Orders</h1>
@@ -79,15 +81,15 @@ export default function OrderListScreen() {
             {orders.map((order) => (
               <tr key={order._id}>
                 <td>{order._id}</td>
-                <td>{order.user ? order.user.name : 'DELETED USER'}</td>
+                <td>{order.user ? order.user.name : "DELETED USER"}</td>
                 <td>{order.createdAt.substring(0, 10)}</td>
                 <td>{order.totalPrice.toFixed(2)}</td>
-                <td>{order.isPaid ? order.paidAt.substring(0, 10) : 'No'}</td>
-                <td>{order.isPaid ? order.paidAt.substring(0, 10) : 'No'}</td>
+                <td>{order.isPaid ? order.paidAt.substring(0, 10) : "No"}</td>
+                <td>{order.isPaid ? order.paidAt.substring(0, 10) : "No"}</td>
                 <td>
                   {order.isDelivered
                     ? order.deliveredAt.substring(0, 10)
-                    : 'No'}
+                    : "No"}
                 </td>
                 <td>
                   <Button
@@ -106,5 +108,5 @@ export default function OrderListScreen() {
         </table>
       )}
     </div>
-  )
+  );
 }
